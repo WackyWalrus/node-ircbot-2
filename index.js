@@ -38,6 +38,7 @@ client.on('data', function (data) {
 
         for (i = 0; i < bot.autojoin.length; i += 1) {
             send('JOIN ' + bot.autojoin[i]);
+            send('PRIVMSG ' + bot.autojoin[i] + ' :sup cunts');
         }
     }
 
@@ -54,6 +55,13 @@ client.on('data', function (data) {
      * I'll need this: (\:.*\!).*(PRIVMSG).*(\#.* :)(.*)
      */
     if (data.indexOf('PRIVMSG') !== -1) {
-
+        cache.privmsgRegex = /(\:.*\!).*(PRIVMSG).*(\#.* :)(.*)/i;
+        cache.found = String(data).match(cache.privmsgRegex);
+        cache.currentMsg = {};
+        if (cache.found !== null) {
+            cache.currentMsg.user = String(cache.found[1]).replace(':', '').replace('!', '');
+            cache.currentMsg.channel = String(cache.found[3]).replace(' :', '');
+            cache.currentMsg.msg = cache.found[4];
+        }
     }
 });
