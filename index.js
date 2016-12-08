@@ -17,6 +17,10 @@ client.connect({
     'use strict';
     console.log('connected');
 });
+client.setNoDelay(true);
+
+var commands = require('./commands'),
+    i;
 
 function send(command) {
     'use strict';
@@ -61,7 +65,15 @@ client.on('data', function (data) {
         if (cache.found !== null) {
             cache.currentMsg.user = String(cache.found[1]).replace(':', '').replace('!', '');
             cache.currentMsg.channel = String(cache.found[3]).replace(' :', '');
-            cache.currentMsg.msg = cache.found[4];
+            cache.currentMsg.msg = String(cache.found[4]);
+
+            for(i in commands) {
+                if (commands.hasOwnProperty(i)) {
+                    if (cache.currentMsg.msg.indexOf(i) === 0) {
+                        commands[i](client, cache.currentMsg);
+                    }
+                }
+            }
         }
     }
 });
