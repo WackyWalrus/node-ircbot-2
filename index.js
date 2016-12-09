@@ -67,7 +67,7 @@ client.on('data', function (data) {
             cache.currentMsg.channel = String(cache.found[3]).replace(' :', '');
             cache.currentMsg.msg = String(cache.found[4]);
 
-            for(i in commands) {
+            for (i in commands) {
                 if (commands.hasOwnProperty(i)) {
                     if (cache.currentMsg.msg.indexOf(i) === 0) {
                         commands[i](client, cache.currentMsg);
