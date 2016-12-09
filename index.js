@@ -27,7 +27,7 @@ function send(command) {
     return client.write(command + '\n');
 }
 
-client.on('data', function (data) {
+function handleData(data) {
     'use strict';
     var i;
 
@@ -76,4 +76,6 @@ client.on('data', function (data) {
             }
         }
     }
-});
+}
+
+client.on('data', handleData);
