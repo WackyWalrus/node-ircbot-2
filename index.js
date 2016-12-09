@@ -2,6 +2,7 @@
  * get requirements and setup client
  */
 var json = require('jsonfile');
+var scrape = require("scrape-url");
 var net = require('net');
 var client = net.Socket();
 
@@ -36,6 +37,8 @@ readDB(function () {
     'use strict';
     var cache = {},
         i;
+
+    cache.getURL = new RegExp("(^|[ \t\r\n])((http|https):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))", "g");
 
     /**
      * connect to freenode
@@ -146,6 +149,31 @@ readDB(function () {
                             }
                         }
                     }
+
+                    /**
+                     * check if it's a url
+                     */
+                    if (cache.currentMsg.msg.indexOf('http://') !== -1 || cache.currentMsg.msg.indexOf('https://') !== -1) {
+                        cache.match = cache.currentMsg.msg.match(cache.getURL);
+                        if (cache.match !== null) {
+                            cache.match = cache.match[0].trim();
+                            if (cache.match !== null && cache.match !== undefined && cache.match !== 0) {
+                                scrape(cache.match, 'head title', function (error, titles) {
+                                    if (!error) {
+                                        if (titles[0] !== undefined && titles[0] !== null && titles[0].length) {
+                                            cache.string = titles[0].text();
+                                            cache.string = String(cache.string).replace(/\r?\n|\r/g, '');
+                                            cache.string = String(cache.string).trim();
+                                            send('PRIVMSG ' + cache.currentMsg.channel + ' :' + cache.string);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                        delete cache.match;
+                        delete cache.string;
+                    }
+
                 }
             }
         }

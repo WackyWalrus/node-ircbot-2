@@ -48,6 +48,31 @@ function echo(client, msg) {
     }
 }
 
+function join(client, msg) {
+    'use strict';
+    if (checkMsg(msg) && client.bot.db.admins.hasOwnProperty(msg.user)) {
+        var command = 'JOIN ' + String(msg.msg).replace('join ', '');
+        send(client, command);
+    }
+}
+
+function gtfo(client, msg) {
+    'use strict';
+    if (checkMsg(msg) && client.bot.db.admins.hasOwnProperty(msg.user)) {
+        var channel = String(msg.msg).replace('gtfo ', '');
+        send(client, 'PRIVMSG ' + channel + ' :.ud timeshifter');
+        send(client, 'PART ' + channel);
+    }
+}
+
+function nick(client, msg) {
+    'use strict';
+    if (checkMsg(msg) && client.bot.db.admins.hasOwnProperty(msg.user)) {
+        var name = String(msg.msg).replace('nick ', '');
+        send(client, 'NICK ' + name);
+    }
+}
+
 function admin(client, msg) {
     'use strict';
     var cache = {},
@@ -75,7 +100,7 @@ function ignore(client, msg) {
     if (String(msg.msg) !== 'ignore') {
         msg.msg = String(msg.msg).replace('ignore ', '');
         if (checkMsg(msg) && checkDB(client)) {
-            if (client.bot.db.admins.hasOwnProperty(msg.user)){
+            if (client.bot.db.admins.hasOwnProperty(msg.user)) {
                 cache.users = String(msg.msg).split(' ');
                 for (i = 0; i < cache.users.length; i += 1) {
                     if (client.bot.db.ignored[cache.users[i]] === undefined) {
@@ -227,6 +252,9 @@ function rmpoint(client, msg) {
 }
 
 module.exports.echo = echo;
+module.exports.join = join;
+module.exports.gtfo = gtfo;
+module.exports.nick = nick;
 module.exports.points = points;
 module.exports.addpoint = addpoint;
 module.exports.rmpoint = rmpoint;
