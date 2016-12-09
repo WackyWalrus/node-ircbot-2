@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * get requirements and setup client
  */
@@ -15,6 +17,10 @@ var bot = {
     autojoin: [
         '#DogeTester'
     ],
+    requirements: {
+        commands: './commands.js'
+    },
+    required: {},
     json: json
 };
 
@@ -22,7 +28,6 @@ var bot = {
  * read db
  */
 function readDB(callback) {
-    'use strict';
     json.readFile(bot.path + 'db.json', function (err, obj) {
         if (obj) {
             bot.db = obj;
@@ -34,7 +39,6 @@ function readDB(callback) {
 }
 
 readDB(function () {
-    'use strict';
     var cache = {},
         i;
 
@@ -57,7 +61,11 @@ readDB(function () {
     /**
      * require commands
      */
-    var commands = require('./commands');
+    for (i in client.bot.requirements) {
+        if (client.bot.requirements.hasOwnProperty(i)) {
+            client.bot.required[i] = require(String(client.bot.requirements[i]).replace('.js', ''));
+        }
+    }
 
     /**
      * just adds a newline to make sure the command gets sent to the server
@@ -116,36 +124,45 @@ readDB(function () {
                      * if this is just asking the bot to reload
                      */
                     if (cache.currentMsg.msg === bot.name + ' reload the thing') {
+                        client.bot.required = {};
                         /**
-                         * go through the 'require' module, find the commands.js file a delete it from the cache
+                         * go through the 'require' module, find the required files a delete them from the cache
                          */
-                        for (i in require.cache) {
-                            if (require.cache.hasOwnProperty(i)) {
-                                if (i.indexOf('commands.js') > -1) {
-                                    delete require.cache[i];
+                        for (i in client.bot.requirements) {
+                            if (client.bot.requirements.hasOwnProperty(i)) {
+                                var r;
+                                for (r in require.cache) {
+                                    if (require.cache.hasOwnProperty(r)) {
+                                        if (r.indexOf(client.bot.requirements[i]) !== -1) {
+                                            delete require.cache[r];
+                                        }
+                                    }
                                 }
                             }
                         }
                         /**
                          * require it again and send a message back
                          */
-                        commands = require('./commands');
+                        for (i in client.bot.requirements) {
+                            if (client.bot.requirements.hasOwnProperty(i)) {
+                                client.bot.required[i] = require(String(client.bot.requirements[i]).replace('.js', ''));
+                            }
+                        }
                         send('PRIVMSG ' + cache.currentMsg.channel + ' :reloaded, bruh');
                     }
 
                     /**
                      * go through the commands
                      */
-                    for (i in commands) {
-                        if (commands.hasOwnProperty(i)) {
-                            /**
-                             * if this command is being called
-                             */
-                            if (cache.currentMsg.msg.indexOf(i) === 0) {
-                                /**
-                                 * call it
-                                 */
-                                commands[i](client, cache.currentMsg);
+                    for (i in client.bot.required) {
+                        if (client.bot.required.hasOwnProperty(i)) {
+                            var r;
+                            for (r in client.bot.required[i]) {
+                                if (client.bot.required[i].hasOwnProperty(r)) {
+                                    if (cache.currentMsg.msg.indexOf(r) === 0) {
+                                        client.bot.required[i][r](client, cache.currentMsg);
+                                    }
+                                }
                             }
                         }
                     }
