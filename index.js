@@ -18,7 +18,8 @@ var bot = {
         '#DogeTester'
     ],
     requirements: {
-        commands: './commands.js'
+        commands: './commands.js',
+        custom: './custom.js'
     },
     required: {},
     json: json
@@ -103,7 +104,7 @@ readDB(function () {
          * I'll need this: (\:.*\!).*(PRIVMSG).*(\#.* :)(.*)
          */
         if (data.indexOf('PRIVMSG') !== -1) {
-            cache.privmsgRegex = /(\:.*\!).*(PRIVMSG).*(\#.* :)(.*)/i;
+            cache.privmsgRegex = /(\:.*\!).*(PRIVMSG .* :)(.*)/i;
             cache.found = String(data).match(cache.privmsgRegex);
             cache.currentMsg = {};
             /**
@@ -114,8 +115,8 @@ readDB(function () {
                  * setup data
                  */
                 cache.currentMsg.user = String(cache.found[1]).replace(':', '').replace('!', '');
-                cache.currentMsg.channel = String(cache.found[3]).replace(' :', '');
-                cache.currentMsg.msg = String(cache.found[4]);
+                cache.currentMsg.channel = String(cache.found[2]).replace(' :', '').replace('PRIVMSG ', '');
+                cache.currentMsg.msg = String(cache.found[3]);
                 /**
                  * make sure this data isn't coming from the bot, that would be loopy
                  */
@@ -133,7 +134,7 @@ readDB(function () {
                                 var r;
                                 for (r in require.cache) {
                                     if (require.cache.hasOwnProperty(r)) {
-                                        if (r.indexOf(client.bot.requirements[i]) !== -1) {
+                                        if (r.indexOf(i) !== -1) {
                                             delete require.cache[r];
                                         }
                                     }
