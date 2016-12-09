@@ -275,11 +275,17 @@ function addpoint(client, msg) {
                 cache.users = removeDuplicates(cache.users);
                 if (cache.users.length > 0) {
                     for (i = 0; i < cache.users.length; i += 1) {
+                        cache.string = '';
                         if (client.bot.db.points[cache.users[i]] === undefined) {
                             client.bot.db.points[cache.users[i]] = 1;
                         } else {
                             client.bot.db.points[cache.users[i]] += 1;
                         }
+                        cache.string = cache.users[i] + ' has ' + client.bot.db.points[cache.users[i]] + ' point';
+                        if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
+                            cache.string += 's';
+                        }
+                        send(client, "PRIVMSG " + msg.channel + " :" + cache.string);
                     }
                     client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                 }
@@ -308,6 +314,11 @@ function rmpoint(client, msg) {
                         } else {
                             client.bot.db.points[cache.users[i]] -= 1;
                         }
+                        cache.string = cache.users[i] + ' has ' + client.bot.db.points[cache.users[i]] + ' point';
+                        if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
+                            cache.string += 's';
+                        }
+                        send(client, "PRIVMSG " + msg.channel + " :" + cache.string);
                     }
                     client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                 }
