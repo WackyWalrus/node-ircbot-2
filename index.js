@@ -94,6 +94,18 @@ readDB(function () {
                 cache.currentMsg.channel = String(cache.found[3]).replace(' :', '');
                 cache.currentMsg.msg = String(cache.found[4]);
 
+                if (cache.currentMsg.msg === 'dogebot2 reload the thing') {
+                    for (i in require.cache) {
+                        if (require.cache.hasOwnProperty(i)) {
+                            if (i.indexOf('commands.js') > -1) {
+                                delete require.cache[i];
+                            }
+                        }
+                    }
+                    commands = require('./commands');
+                    send('PRIVMSG ' + cache.currentMsg.channel + ' :reloaded, bruh');
+                }
+
                 for (i in commands) {
                     if (commands.hasOwnProperty(i)) {
                         if (cache.currentMsg.msg.indexOf(i) === 0) {
