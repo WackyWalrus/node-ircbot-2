@@ -67,6 +67,18 @@ function removeDuplicates(array) {
     return temp;
 }
 
+function removeEmpty(array) {
+    var i,
+        tempArray = [];
+    for (i = 0; i < array.length; i += 1) {
+        array[i] = String(array[i]).trim();
+        if (array[i] !== ' ' && array[i] !== '') {
+            tempArray.push(array[i]);
+        }
+    }
+    return tempArray;
+}
+
 /**
  * echo command
  */
@@ -130,6 +142,7 @@ function admin(client, msg) {
             if (client.bot.db.admins.hasOwnProperty(msg.user)) {
                 cache.users = String(msg.msg).split(' ');
                 cache.users = removeDuplicates(cache.users);
+                cache.users = removeEmpty(cache.users);
                 for (i = 0; i < cache.users.length; i += 1) {
                     if (client.bot.db.admins[cache.users[i]] === undefined) {
                         client.bot.db.admins[cache.users[i]] = 1;
@@ -153,6 +166,7 @@ function ignore(client, msg) {
             if (client.bot.db.admins.hasOwnProperty(msg.user)) {
                 cache.users = String(msg.msg).split(' ');
                 cache.users = removeDuplicates(cache.users);
+                cache.users = removeEmpty(cache.users);
                 for (i = 0; i < cache.users.length; i += 1) {
                     if (client.bot.db.ignored[cache.users[i]] === undefined) {
                         client.bot.db.ignored[cache.users[i]] = 1;
@@ -176,6 +190,7 @@ function unadmin(client, msg) {
             if (client.bot.db.admins.hasOwnProperty(msg.user)) {
                 cache.users = String(msg.msg).split(' ');
                 cache.users = removeDuplicates(cache.users);
+                cache.users = removeEmpty(cache.users);
                 for (i = 0; i < cache.users.length; i += 1) {
                     if (client.bot.db.admins.hasOwnProperty(cache.users[i])) {
                         delete client.bot.db.admins[cache.users[i]];
@@ -199,6 +214,7 @@ function unignore(client, msg) {
             if (client.bot.db.admins.hasOwnProperty(msg.user)) {
                 cache.users = String(msg.msg).split(' ');
                 cache.users = removeDuplicates(cache.users);
+                cache.users = removeEmpty(cache.users);
                 for (i = 0; i < cache.users.length; i += 1) {
                     if (client.bot.db.ignored.hasOwnProperty(cache.users[i])) {
                         delete client.bot.db.ignored[cache.users[i]];
@@ -273,19 +289,22 @@ function addpoint(client, msg) {
             if (cache.users.length > 0) {
                 cache.users = cache.users.split(' ');
                 cache.users = removeDuplicates(cache.users);
+                cache.users = removeEmpty(cache.users);
                 if (cache.users.length > 0) {
                     for (i = 0; i < cache.users.length; i += 1) {
-                        cache.string = '';
-                        if (client.bot.db.points[cache.users[i]] === undefined) {
-                            client.bot.db.points[cache.users[i]] = 1;
-                        } else {
-                            client.bot.db.points[cache.users[i]] += 1;
+                        if (cache.users[i] !== 'addpoint') {
+                            cache.string = '';
+                            if (client.bot.db.points[cache.users[i]] === undefined) {
+                                client.bot.db.points[cache.users[i]] = 1;
+                            } else {
+                                client.bot.db.points[cache.users[i]] += 1;
+                            }
+                            cache.string = cache.users[i] + ' has ' + client.bot.db.points[cache.users[i]] + ' point';
+                            if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
+                                cache.string += 's';
+                            }
+                            send(client, "PRIVMSG " + msg.channel + " :" + cache.string);
                         }
-                        cache.string = cache.users[i] + ' has ' + client.bot.db.points[cache.users[i]] + ' point';
-                        if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
-                            cache.string += 's';
-                        }
-                        send(client, "PRIVMSG " + msg.channel + " :" + cache.string);
                     }
                     client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                 }
@@ -307,6 +326,7 @@ function rmpoint(client, msg) {
             if (cache.users.length > 0) {
                 cache.users = cache.users.split(' ');
                 cache.users = removeDuplicates(cache.users);
+                cache.users = removeEmpty(cache.users);
                 if (cache.users.length > 0) {
                     for (i = 0; i < cache.users.length; i += 1) {
                         if (client.bot.db.points[cache.users[i]] === undefined) {
