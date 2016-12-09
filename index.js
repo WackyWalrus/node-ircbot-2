@@ -124,7 +124,7 @@ readDB(function () {
                     /**
                      * if this is just asking the bot to reload
                      */
-                    if (cache.currentMsg.msg === bot.name + ' reload the thing') {
+                    if (cache.currentMsg.msg === bot.name + ' reload the thing' && !client.bot.db.ignored.hasOwnProperty(cache.currentMsg.user)) {
                         client.bot.required = {};
                         /**
                          * go through the 'require' module, find the required files a delete them from the cache
@@ -191,7 +191,6 @@ readDB(function () {
                         delete cache.match;
                         delete cache.string;
                     }
-
                 }
             }
         }
