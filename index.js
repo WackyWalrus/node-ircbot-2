@@ -34,7 +34,8 @@ function readDB(callback) {
 
 readDB(function () {
     'use strict';
-    var cache = {};
+    var cache = {},
+        i;
 
     /**
      * connect to freenode
@@ -50,9 +51,14 @@ readDB(function () {
     client.bot = bot;
 
 
-    var commands = require('./commands'),
-        i;
+    /**
+     * require commands
+     */
+    var commands = require('./commands');
 
+    /**
+     * just adds a newline to make sure the command gets sent to the server
+     */
     function send(command) {
         return client.write(command + '\n');
     }
@@ -89,12 +95,27 @@ readDB(function () {
             cache.privmsgRegex = /(\:.*\!).*(PRIVMSG).*(\#.* :)(.*)/i;
             cache.found = String(data).match(cache.privmsgRegex);
             cache.currentMsg = {};
+            /**
+             * if there's data for this msg
+             */
             if (cache.found !== null) {
+                /**
+                 * setup data
+                 */
                 cache.currentMsg.user = String(cache.found[1]).replace(':', '').replace('!', '');
                 cache.currentMsg.channel = String(cache.found[3]).replace(' :', '');
                 cache.currentMsg.msg = String(cache.found[4]);
+                /**
+                 * make sure this data isn't coming from the bot, that would be loopy
+                 */
                 if (cache.currentMsg.user !== bot.name) {
-                    if (cache.currentMsg.msg === 'dogebot2 reload the thing') {
+                    /**
+                     * if this is just asking the bot to reload
+                     */
+                    if (cache.currentMsg.msg === bot.name + ' reload the thing') {
+                        /**
+                         * go through the 'require' module, find the commands.js file a delete it from the cache
+                         */
                         for (i in require.cache) {
                             if (require.cache.hasOwnProperty(i)) {
                                 if (i.indexOf('commands.js') > -1) {
@@ -102,13 +123,25 @@ readDB(function () {
                                 }
                             }
                         }
+                        /**
+                         * require it again and send a message back
+                         */
                         commands = require('./commands');
                         send('PRIVMSG ' + cache.currentMsg.channel + ' :reloaded, bruh');
                     }
 
+                    /**
+                     * go through the commands
+                     */
                     for (i in commands) {
                         if (commands.hasOwnProperty(i)) {
+                            /**
+                             * if this command is being called
+                             */
                             if (cache.currentMsg.msg.indexOf(i) === 0) {
+                                /**
+                                 * call it
+                                 */
                                 commands[i](client, cache.currentMsg);
                             }
                         }
