@@ -122,17 +122,6 @@ readDB(function () {
         console.log('Received: ' + data);
 
         /**
-         * Run module listeners
-         */
-        for (i in client.bot.required) {
-            if (client.bot.required.hasOwnProperty(i)) {
-                if (client.bot.required[i].hasOwnProperty('listener')) {
-                    client.bot.required[i].listener(client, data);
-                }
-            }
-        }
-
-        /**
          * Handle long and autojoin
          */
         if (data.indexOf('Found your hostname') !== -1) {
@@ -151,6 +140,17 @@ readDB(function () {
         if (data.indexOf('PING :') !== -1) {
             cache.pingBackTo = String(data).replace('PING ', '');
             send('PONG ' + cache.pingBackTo);
+        }
+
+        /**
+         * Run module listeners
+         */
+        for (i in client.bot.required) {
+            if (client.bot.required.hasOwnProperty(i)) {
+                if (client.bot.required[i].hasOwnProperty('listener')) {
+                    client.bot.required[i].listener(client, data);
+                }
+            }
         }
 
         /**
