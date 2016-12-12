@@ -247,6 +247,20 @@ readDB(function () {
                         delete cache.match;
                         delete cache.string;
                     }
+
+                    /**
+                     * Save the msg
+                     */
+                    cache.time = Date.now();
+                    if (!client.bot.db.hasOwnProperty('messages')) {
+                        client.bot.db.messages = {};
+                    }
+                    client.bot.db.messages[cache.time] = cache.currentMsg;
+                    if (Object.keys(client.bot.db.messages).length > 50) {
+                        for (var first in client.bot.db.messages) break;
+                            delete client.bot.db.messages[first];
+                    }
+                    client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                 }
             }
         }
