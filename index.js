@@ -22,7 +22,50 @@ var bot = {
         custom: './custom.js'
     },
     required: {},
-    json: json
+    json: json,
+    functions: {
+        send: function (client, command) {
+            client.write(command + '\n');
+        },
+        checkDB: function (client) {
+            if (client !== undefined) {
+                if (client.bot !== undefined) {
+                    if (client.bot.db !== undefined) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        },
+        checkMsg: function (msg) {
+            if (msg.msg !== undefined &&
+                    String(msg.msg).length > 0 &&
+                    msg.channel !== undefined &&
+                    String(msg.channel).length > 0 &&
+                    msg.user !== undefined &&
+                    String(msg.user).length > 0) {
+                return true;
+            }
+            return false;
+        },
+        removeDuplicates: function (arr) {
+            var temp = arr.filter(function (elem, index, self) {
+                return index === self.indexOf(elem);
+            });
+            return temp;
+        },
+        removeEmpty: function (arr) {
+            var i,
+                tempArray = [];
+            for (i = 0; i < arr.length; i += 1) {
+                arr[i] = String(arr[i]).trim();
+                if (arr[i] !== ' ' && arr[i] !== '') {
+                    tempArray.push(arr[i]);
+                }
+            }
+            return tempArray;
+        }
+    }
 };
 
 /**
@@ -79,6 +122,17 @@ readDB(function () {
         console.log('Received: ' + data);
 
         /**
+         * Run module listeners
+         */
+        for (i in client.bot.required) {
+            if (client.bot.required.hasOwnProperty(i)) {
+                if (client.bot.required[i].hasOwnProperty('listener')) {
+                    client.bot.required[i].listener(client, data);
+                }
+            }
+        }
+
+        /**
          * Handle long and autojoin
          */
         if (data.indexOf('Found your hostname') !== -1) {
@@ -124,7 +178,7 @@ readDB(function () {
                     /**
                      * if this is just asking the bot to reload
                      */
-                    if (cache.currentMsg.msg === bot.name + ' reload the thing' &&
+                    if (cache.currentMsg.msg === bot.name + ' reload' &&
                             !client.bot.db.ignored.hasOwnProperty(cache.currentMsg.user) &&
                             client.bot.db.admins.hasOwnProperty(cache.currentMsg.user)) {
                         client.bot.required = {};
