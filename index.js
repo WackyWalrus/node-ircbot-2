@@ -24,7 +24,7 @@ var bot = {
     required: {},
     json: json,
     functions: {
-        send: function (client, command) {
+        send: function (command) {
             client.write(command + '\n');
         },
         checkDB: function (client) {

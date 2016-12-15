@@ -30,7 +30,7 @@ function echo(client, msg) {
             command;
         if (string !== null && String(string).length !== 0) {
             command = 'PRIVMSG ' + msg.channel + ' :' + String(msg.msg).replace('echo ', '');
-            client.bot.functions.send(client, command);
+            client.bot.functions.send(command);
         }
     }
 }
@@ -44,7 +44,7 @@ function join(client, msg) {
             command;
         if (channel !== null && String(channel).length !== 0) {
             command = 'JOIN ' + String(msg.msg).replace('join ', '');
-            client.bot.functions.send(client, command);
+            client.bot.functions.send(command);
         }
     }
 }
@@ -55,8 +55,8 @@ function join(client, msg) {
 function gtfo(client, msg) {
     if (client.bot.functions.checkMsg(msg) && client.bot.db.admins.hasOwnProperty(msg.user)) {
         var channel = String(msg.msg).replace('gtfo ', '');
-        client.bot.functions.send(client, 'PRIVMSG ' + channel + ' :.ud timeshifter');
-        client.bot.functions.send(client, 'PART ' + channel);
+        client.bot.functions.send('PRIVMSG ' + channel + ' :.ud timeshifter');
+        client.bot.functions.send('PART ' + channel);
     }
 }
 
@@ -67,7 +67,7 @@ function nick(client, msg) {
     if (client.bot.functions.checkMsg(msg) && client.bot.db.admins.hasOwnProperty(msg.user)) {
         var name = String(msg.msg).replace('nick ', '');
         if (name !== null && String(name).length !== 0) {
-            client.bot.functions.send(client, 'NICK ' + name);
+            client.bot.functions.send('NICK ' + name);
         }
     }
 }
@@ -194,7 +194,7 @@ function points(client, msg) {
                             }
                         }
                         cache.command = 'PRIVMSG ' + msg.channel + ' :' + cache.string;
-                        client.bot.functions.send(client, cache.command);
+                        client.bot.functions.send(cache.command);
                     }
                 } else {
                     cache.user = String(msg.msg).replace('points ', '');
@@ -207,7 +207,7 @@ function points(client, msg) {
                                     if (cache.points[cache.user] !== 1 && cache.points[cache.user] !== -1) {
                                         cache.command += 's';
                                     }
-                                    client.bot.functions.send(client, cache.command);
+                                    client.bot.functions.send(cache.command);
                                 }
                             }
                         }
@@ -245,7 +245,7 @@ function addpoint(client, msg) {
                             if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
                                 cache.string += 's';
                             }
-                            client.bot.functions.send(client, "PRIVMSG " + msg.channel + " :" + cache.string);
+                            client.bot.functions.send("PRIVMSG " + msg.channel + " :" + cache.string);
                         }
                     }
                     client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
@@ -280,9 +280,44 @@ function rmpoint(client, msg) {
                         if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
                             cache.string += 's';
                         }
-                        client.bot.functions.send(client, "PRIVMSG " + msg.channel + " :" + cache.string);
+                        client.bot.functions.send("PRIVMSG " + msg.channel + " :" + cache.string);
                     }
                     client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
+                }
+            }
+        }
+    }
+}
+
+function ud(client, msg) {
+    var cache = {},
+        urban = require('urban');
+    if (client.bot.functions.checkDB(client) && client.bot.functions.checkMsg(msg)) {
+        if (!client.bot.db.ignored.hasOwnProperty(msg.user)) {
+            if (msg.msg !== 'ud') {
+                cache.term = String(msg.msg).replace('ud ', '');
+                if (cache.term !== null && String(cache.term).length !== 0) {
+                    cache.search = urban(cache.term);
+                    cache.search.first(function (json) {
+                        if (json !== undefined && json !== null) {
+                            if (json.definition !== undefined && json.definition !== null) {
+                                cache.definition = String(json.definition).split('\n');
+                                if (cache.definition !== undefined && cache.definition !== null) {
+                                    if (cache.definition[0] !== undefined && cache.definition[0] !== null) {
+                                        client.bot.functions.send('PRIVMSG ' + msg.channel + ' :' + cache.definition[0]);
+                                    } else {
+                                        client.bot.functions.send('PRIVMSG ' + msg.channel + ' :no definition found');
+                                    }
+                                } else {
+                                    client.bot.functions.send('PRIVMSG ' + msg.channel + ' :no definition found');
+                                }
+                            } else {
+                                client.bot.functions.send('PRIVMSG ' + msg.channel + ' :no definition found');
+                            }
+                        } else {
+                            client.bot.functions.send('PRIVMSG ' + msg.channel + ' :no definition found');
+                        }
+                    });
                 }
             }
         }
@@ -300,3 +335,4 @@ module.exports.ignore = ignore;
 module.exports.unignore = unignore;
 module.exports.admin = admin;
 module.exports.unadmin = unadmin;
+module.exports.ud = ud;
