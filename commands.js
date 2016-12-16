@@ -296,7 +296,7 @@ function ud(client, msg) {
         if (!client.bot.db.ignored.hasOwnProperty(msg.user)) {
             if (msg.msg !== 'ud') {
                 cache.term = String(msg.msg).replace('ud ', '');
-                if (cache.term !== null && String(cache.term).length !== 0) {
+                if (cache.term !== null && String(cache.term).length !== 0 && cache.term !== msg.msg) {
                     cache.search = urban(cache.term);
                     cache.search.first(function (json) {
                         if (json !== undefined && json !== null) {
