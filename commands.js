@@ -28,7 +28,7 @@ function echo(client, msg) {
     if (client.bot.functions.checkMsg(msg) && !client.bot.db.ignored.hasOwnProperty(msg.user)) {
         var string = String(msg.msg).replace('echo ', ''),
             command;
-        if (string !== null && String(string).length !== 0) {
+        if (string !== null && String(string).length !== 0 && String(string).substr(0, 1) !== '!') {
             command = 'PRIVMSG ' + msg.channel + ' :' + String(msg.msg).replace('echo ', '');
             client.bot.functions.send(command);
         }
@@ -278,7 +278,8 @@ function addpoint(client, msg) {
                 cache.users = client.bot.functions.removeEmpty(cache.users);
                 if (cache.users.length > 0) {
                     for (i = 0; i < cache.users.length; i += 1) {
-                        if (cache.users[i] !== 'addpoint') {
+                        if (cache.users[i] !== 'addpoint' && cache.users[i] !== msg.user) {
+                            cache.users[i] = String(cache.users[i]).toLowerCase();
                             cache.string = '';
                             if (client.bot.db.points[cache.users[i]] === undefined) {
                                 client.bot.db.points[cache.users[i]] = 1;
@@ -315,20 +316,33 @@ function rmpoint(client, msg) {
                 cache.users = client.bot.functions.removeEmpty(cache.users);
                 if (cache.users.length > 0) {
                     for (i = 0; i < cache.users.length; i += 1) {
-                        if (client.bot.db.points[cache.users[i]] === undefined) {
-                            client.bot.db.points[cache.users[i]] = -1;
-                        } else {
-                            client.bot.db.points[cache.users[i]] -= 1;
+                        if (cache.users[i] !== 'rmpoint' && cache.users[i] !== msg.user) {
+                            cache.users[i] = String(cache.users[i]).toLowerCase();
+                            if (client.bot.db.points[cache.users[i]] === undefined) {
+                                client.bot.db.points[cache.users[i]] = -1;
+                            } else {
+                                client.bot.db.points[cache.users[i]] -= 1;
+                            }
+                            cache.string = cache.users[i] + ' has ' + client.bot.db.points[cache.users[i]] + ' point';
+                            if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
+                                cache.string += 's';
+                            }
+                            client.bot.functions.send("PRIVMSG " + msg.channel + " :" + cache.string);
                         }
-                        cache.string = cache.users[i] + ' has ' + client.bot.db.points[cache.users[i]] + ' point';
-                        if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
-                            cache.string += 's';
-                        }
-                        client.bot.functions.send("PRIVMSG " + msg.channel + " :" + cache.string);
                     }
                     client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                 }
             }
+        }
+    }
+}
+
+function clearpoints(client, msg) {
+    if (client.bot.functions.checkDB(client) && client.bot.functions.checkMsg(msg)) {
+        if (client.bot.db.admins.hasOwnProperty(msg.user)) {
+            client.bot.db.points = {};
+            client.bot.functions.send("PRIVMSG " + msg.channel + ' :cleared points');
+            client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
         }
     }
 }
@@ -382,3 +396,4 @@ module.exports.unignore = unignore;
 module.exports.admin = admin;
 module.exports.unadmin = unadmin;
 module.exports.ud = ud;
+module.exports.clearpoints = clearpoints;
