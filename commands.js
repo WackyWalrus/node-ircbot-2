@@ -72,13 +72,51 @@ function nick(client, msg) {
     }
 }
 
+function admins(client, msg) {
+	var admin,
+		html = '',
+		i = 0,
+		length = Object.keys(client.bot.db.admins).length;
+	if (String(msg.msg) === 'admins') {
+		if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
+			for (admin in client.bot.db.admins) {
+				i += 1;
+				html += admin;
+				if (i !== length) {
+					html += ', ';
+				}
+			}
+			client.bot.functions.send('PRIVMSG ' + msg.channel + ' :admins: ' + html);
+		}
+	}
+}
+
+function ignored(client, msg) {
+	var ignored,
+		html = '',
+		i = 0,
+		length = Object.keys(client.bot.db.ignored).length;
+	if (String(msg.msg) === 'ignored') {
+		if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
+			for (ignored in client.bot.db.ignored) {
+				i += 1;
+				html += ignored;
+				if (i !== length) {
+					html += ', ';
+				}
+			}
+			client.bot.functions.send('PRIVMSG ' + msg.channel + ' :ignored: ' + html);
+		}
+	}
+}
+
 /**
  * make a user an admin
  */
 function admin(client, msg) {
     var cache = {},
         i;
-    if (String(msg.msg) !== 'admin') {
+    if (String(msg.msg) !== 'admin' && String(msg.msg) !== 'admins') {
         msg.msg = String(msg.msg).replace('admin ', '');
         if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
             if (client.bot.db.admins.hasOwnProperty(msg.user)) {
@@ -86,11 +124,14 @@ function admin(client, msg) {
                 cache.users = client.bot.functions.removeDuplicates(cache.users);
                 cache.users = client.bot.functions.removeEmpty(cache.users);
                 for (i = 0; i < cache.users.length; i += 1) {
-                    if (client.bot.db.admins[cache.users[i]] === undefined) {
+                    if (client.bot.db.admins[cache.users[i]] === undefined && 
+                    		cache.users[i] !== 'admin' &&
+                    		cache.users[i] !== 'admins') {
                         client.bot.db.admins[cache.users[i]] = 1;
                     }
                 }
                 client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
+                client.bot.functions.send('PRIVMSG ' + msg.channel + ' :saved');
             }
         }
     }
@@ -102,7 +143,7 @@ function admin(client, msg) {
 function ignore(client, msg) {
     var cache = {},
         i;
-    if (String(msg.msg) !== 'ignore') {
+    if (String(msg.msg) !== 'ignore' && String(msg.msg) !== 'ignored') {
         msg.msg = String(msg.msg).replace('ignore ', '');
         if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
             if (client.bot.db.admins.hasOwnProperty(msg.user)) {
@@ -115,6 +156,7 @@ function ignore(client, msg) {
                     }
                 }
                 client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
+                client.bot.functions.send('PRIVMSG ' + msg.channel + ' :saved');
             }
         }
     }
@@ -139,6 +181,7 @@ function unadmin(client, msg) {
                     }
                 }
                 client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
+                client.bot.functions.send('PRIVMSG ' + msg.channel + ' :saved');
             }
         }
     }
@@ -163,6 +206,7 @@ function unignore(client, msg) {
                     }
                 }
                 client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
+                client.bot.functions.send('PRIVMSG ' + msg.channel + ' :saved');
             }
         }
     }
@@ -331,6 +375,8 @@ module.exports.nick = nick;
 module.exports.points = points;
 module.exports.addpoint = addpoint;
 module.exports.rmpoint = rmpoint;
+module.exports.admins = admins;
+module.exports.ignored = ignored;
 module.exports.ignore = ignore;
 module.exports.unignore = unignore;
 module.exports.admin = admin;
