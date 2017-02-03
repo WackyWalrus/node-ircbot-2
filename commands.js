@@ -73,41 +73,45 @@ function nick(client, msg) {
 }
 
 function admins(client, msg) {
-	var admin,
-		html = '',
-		i = 0,
-		length = Object.keys(client.bot.db.admins).length;
-	if (String(msg.msg) === 'admins') {
-		if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
-			for (admin in client.bot.db.admins) {
-				i += 1;
-				html += admin;
-				if (i !== length) {
-					html += ', ';
-				}
-			}
-			client.bot.functions.send('PRIVMSG ' + msg.channel + ' :admins: ' + html);
-		}
-	}
+    var admin,
+        html = '',
+        i = 0,
+        length = Object.keys(client.bot.db.admins).length;
+    if (String(msg.msg) === 'admins') {
+        if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
+            for (admin in client.bot.db.admins) {
+                if (client.bot.db.admins.hasOwnProperty(admin)) {
+                    i += 1;
+                    html += admin;
+                    if (i !== length) {
+                        html += ', ';
+                    }
+                }
+            }
+            client.bot.functions.send('PRIVMSG ' + msg.channel + ' :admins: ' + html);
+        }
+    }
 }
 
 function ignored(client, msg) {
-	var ignored,
-		html = '',
-		i = 0,
-		length = Object.keys(client.bot.db.ignored).length;
-	if (String(msg.msg) === 'ignored') {
-		if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
-			for (ignored in client.bot.db.ignored) {
-				i += 1;
-				html += ignored;
-				if (i !== length) {
-					html += ', ';
-				}
-			}
-			client.bot.functions.send('PRIVMSG ' + msg.channel + ' :ignored: ' + html);
-		}
-	}
+    var ig,
+        html = '',
+        i = 0,
+        length = Object.keys(client.bot.db.ignored).length;
+    if (String(msg.msg) === 'ignored') {
+        if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
+            for (ig in client.bot.db.ignored) {
+                if (client.bot.db.ignored.hasOwnProperty(ig)) {
+                    i += 1;
+                    html += ig;
+                    if (i !== length) {
+                        html += ', ';
+                    }
+                }
+            }
+            client.bot.functions.send('PRIVMSG ' + msg.channel + ' :ignored: ' + html);
+        }
+    }
 }
 
 /**
@@ -124,9 +128,9 @@ function admin(client, msg) {
                 cache.users = client.bot.functions.removeDuplicates(cache.users);
                 cache.users = client.bot.functions.removeEmpty(cache.users);
                 for (i = 0; i < cache.users.length; i += 1) {
-                    if (client.bot.db.admins[cache.users[i]] === undefined && 
-                    		cache.users[i] !== 'admin' &&
-                    		cache.users[i] !== 'admins') {
+                    if (client.bot.db.admins[cache.users[i]] === undefined &&
+                            cache.users[i] !== 'admin' &&
+                            cache.users[i] !== 'admins') {
                         client.bot.db.admins[cache.users[i]] = 1;
                     }
                 }
