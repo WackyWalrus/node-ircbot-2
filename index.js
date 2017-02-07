@@ -23,6 +23,7 @@ var bot = {
     },
     required: {},
     json: json,
+    seds: true,
     functions: {
         send: function (command) {
             client.write(command + '\n');
@@ -171,6 +172,7 @@ readDB(function () {
                 cache.currentMsg.user = String(cache.found[1]).replace(':', '').replace('!', '');
                 cache.currentMsg.channel = String(cache.found[2]).replace(' :', '').replace('PRIVMSG ', '');
                 cache.currentMsg.msg = String(cache.found[3]);
+
                 /**
                  * make sure this data isn't coming from the bot, that would be loopy
                  */
@@ -251,16 +253,18 @@ readDB(function () {
                     /**
                      * Save the msg
                      */
-                    cache.time = Date.now();
-                    if (!client.bot.db.hasOwnProperty('messages')) {
-                        client.bot.db.messages = {};
+                    if (cache.currentMsg.user !== bot.name) {
+                        cache.time = Date.now();
+                        if (!client.bot.db.hasOwnProperty('messages')) {
+                            client.bot.db.messages = {};
+                        }
+                        client.bot.db.messages[cache.time] = cache.currentMsg;
+                        if (Object.keys(client.bot.db.messages).length > 50) {
+                            for (var first in client.bot.db.messages) break;
+                                delete client.bot.db.messages[first];
+                        }
+                        client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                     }
-                    client.bot.db.messages[cache.time] = cache.currentMsg;
-                    if (Object.keys(client.bot.db.messages).length > 50) {
-                        for (var first in client.bot.db.messages) break;
-                            delete client.bot.db.messages[first];
-                    }
-                    client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                 }
             }
         }

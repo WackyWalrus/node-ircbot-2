@@ -27,7 +27,13 @@ function objToArr(obj) {
 function echo(client, msg) {
     if (client.bot.functions.checkMsg(msg) && !client.bot.db.ignored.hasOwnProperty(msg.user)) {
         var string = String(msg.msg).replace('echo ', ''),
-            command;
+            command,
+            regex = /[A-Za-z]/,
+            match = String(string).substr(0, 1).match(regex);
+        if (match === null ||
+                match.length === 0) {
+            return false;
+        }
         if (string !== null && String(string).length !== 0 && String(string).substr(0, 1) !== '!') {
             command = 'PRIVMSG ' + msg.channel + ' :' + String(msg.msg).replace('echo ', '');
             client.bot.functions.send(command);
@@ -386,6 +392,56 @@ function ud(client, msg) {
     }
 }
 
+function seds(client, msg) {
+    var cache = {};
+    if (!client.bot.db.ignored.hasOwnProperty(msg.user) &&
+            client.bot.db.admins.hasOwnProperty(msg.user)) {
+        cache.opt = msg.msg.replace('seds ', '');
+        if (cache.opt === 'on') {
+            client.bot.seds = true;
+            client.bot.functions.send('PRIVMSG ' + msg.channel + ' :seds on');
+        } else if (cache.opt === 'off') {
+            client.bot.seds = false;
+            client.bot.functions.send('PRIVMSG ' + msg.channel + ' :seds off');
+        }
+    }
+}
+
+function sed(client, msg) {
+    var split,
+        i,
+        k,
+        keys,
+        result;
+    if (msg.msg.indexOf('s/') === 0) {
+        split = msg.msg.split('/');
+    }
+    if (split !== undefined && split.length) {
+        if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
+            if (client.bot.seds === true &&
+                    !client.bot.db.ignored.hasOwnProperty(msg.user)) {
+                keys = Object.keys(client.bot.db.messages).reverse();
+                for (i = 0; i < keys.length; i += 1) {
+                    k = keys[i];
+                    if (client.bot.db.messages.hasOwnProperty(k)) {
+                        if (client.bot.db.messages[k].user === client.bot.name) {
+                            delete client.bot.db.messages[k];
+                        } else {
+                            if (client.bot.db.messages[k].msg.indexOf('s/') === -1) {
+                                if (client.bot.db.messages[k].msg.indexOf(split[1]) !== -1) {
+                                    result = "<" + client.bot.db.messages[k].user + ">: " + client.bot.db.messages[k].msg.replace(split[1], split[2]);
+                                    client.bot.functions.send('PRIVMSG ' + msg.channel + ' :' + result);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 module.exports.echo = echo;
 module.exports.join = join;
 module.exports.gtfo = gtfo;
@@ -401,3 +457,5 @@ module.exports.admin = admin;
 module.exports.unadmin = unadmin;
 module.exports.ud = ud;
 module.exports.clearpoints = clearpoints;
+module.exports.seds = seds;
+module.exports['s/'] = sed;
