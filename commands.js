@@ -487,15 +487,26 @@ function swap(client, msg) {
                                     client.bot.db.messages[k].msg.indexOf('s/') === -1) {
                                 if (client.bot.db.messages[k].msg.indexOf(split[1]) !== -1 &&
                                         client.bot.db.messages[k].msg.indexOf(split[2]) !== -1) {
-                                    stringSplit = client.bot.db.messages[k].msg.split(split[1]);
-                                    newString[0] = stringSplit[0];
-                                    stringSplit = stringSplit[1].split(split[2]);
-                                    newString[1] = split[2];
-                                    newString[2] = stringSplit[0];
-                                    newString[3] = split[1];
-                                    newString[4] = stringSplit[1];
+                                    if (client.bot.db.messages[k].msg.indexOf(split[2]) > client.bot.db.messages[k].msg.indexOf(split[1])) {
+                                        stringSplit = client.bot.db.messages[k].msg.split(split[1]);
+                                        newString[0] = stringSplit[0];
+                                        newString[1] = split[2];
+                                        stringSplit = stringSplit[1].split(split[2]);
+                                        newString[2] = stringSplit[0];
+                                        newString[3] = split[1];
+                                        newString[4] = stringSplit[1];
+                                    } else {
+                                        stringSplit = client.bot.db.messages[k].msg.split(split[2]);
+                                        newString[0] = stringSplit[0];
+                                        newString[1] = split[1];
+                                        stringSplit = stringSplit[1].split(split[1]);
+                                        newString[2] = stringSplit[0];
+                                        newString[3] = split[2];
+                                        newString[4] = stringSplit[1];
+                                    }
                                     result = "<" + client.bot.db.messages[k].user + ">: " + newString.join('');
                                     client.bot.functions.send('PRIVMSG ' + msg.channel + ' :' + result);
+                                    break;
                                 }
                             }
                         }
