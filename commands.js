@@ -296,13 +296,17 @@ function addpoint(client, msg) {
                             } else {
                                 client.bot.db.points[cache.users[i]] += 1;
                             }
-                            cache.string = cache.users[i] + ' has ' + client.bot.db.points[cache.users[i]] + ' point';
-                            if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
-                                cache.string += 's';
-                            }
-                            client.bot.functions.send("PRIVMSG " + msg.channel + " :" + cache.string);
                         }
                     }
+                    if (cache.users.length === 1) {
+                        cache.string = cache.users[0] + ' has ' + client.bot.db.points[cache.users[0]] + ' point';
+                        if (client.bot.db.points[cache.users[0]] !== 1) {
+                            cache.string += 's';
+                        }
+                    } else {
+                        cache.string = 'Added points to ' + cache.users.length + ' users';
+                    }
+                    client.bot.functions.send("PRIVMSG " + msg.channel + " :" + cache.string);
                     client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                 }
             }
@@ -333,13 +337,17 @@ function rmpoint(client, msg) {
                             } else {
                                 client.bot.db.points[cache.users[i]] -= 1;
                             }
-                            cache.string = cache.users[i] + ' has ' + client.bot.db.points[cache.users[i]] + ' point';
-                            if (client.bot.db.points[cache.users[i]] !== 1 && client.bot.db.points[cache.users[i]] !== -1) {
-                                cache.string += 's';
-                            }
-                            client.bot.functions.send("PRIVMSG " + msg.channel + " :" + cache.string);
                         }
                     }
+                    if (cache.users.length === 1) {
+                        cache.string = cache.users[0] + ' has ' + client.bot.db.points[cache.users[0]] + ' point';
+                        if (client.bot.db.points[cache.users[0]] !== 1) {
+                            cache.string += 's';
+                        }
+                    } else {
+                        cache.string = 'Removed points from ' + cache.users.length + ' users';
+                    }
+                    client.bot.functions.send("PRIVMSG " + msg.channel + " :" + cache.string);
                     client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
                 }
             }
@@ -348,11 +356,22 @@ function rmpoint(client, msg) {
 }
 
 function clearpoints(client, msg) {
+    var usr;
     if (client.bot.functions.checkDB(client) && client.bot.functions.checkMsg(msg)) {
         if (client.bot.db.admins.hasOwnProperty(msg.user)) {
-            client.bot.db.points = {};
-            client.bot.functions.send("PRIVMSG " + msg.channel + ' :cleared points');
-            client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
+            msg.msg = String(msg.msg).trim();
+            if (msg.msg === 'clearpoints') {
+                client.bot.db.points = {};
+                client.bot.functions.send("PRIVMSG " + msg.channel + ' :cleared points');
+                client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
+            } else {
+                usr = String(msg.msg).replace('clearpoints ', '');
+                if (client.bot.db.points.hasOwnProperty(usr)) {
+                    delete client.bot.db.points[usr];
+                    client.bot.functions.send("PRIVMSG " + msg.channel + ' :cleared points from ' + usr);
+                    client.bot.json.writeFile(client.bot.path + 'db.json', client.bot.db);
+                }
+            }
         }
     }
 }

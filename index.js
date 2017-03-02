@@ -74,6 +74,10 @@ var bot = {
  */
 function readDB(callback) {
     json.readFile(bot.path + 'db.json', function (err, obj) {
+        if (err) {
+            console.log(err);
+            return false;
+        }
         if (obj) {
             bot.db = obj;
         } else {
