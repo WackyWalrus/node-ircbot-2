@@ -446,11 +446,56 @@ function sed(client, msg) {
                         if (client.bot.db.messages[k].user === client.bot.name) {
                             delete client.bot.db.messages[k];
                         } else {
-                            if (client.bot.db.messages[k].msg.indexOf('s/') === -1) {
+                            if (client.bot.db.messages[k].msg.indexOf('s/') === -1 &&
+                                    client.bot.db.messages[k].msg.indexOf('swap/') === -1) {
                                 if (client.bot.db.messages[k].msg.indexOf(split[1]) !== -1) {
                                     result = "<" + client.bot.db.messages[k].user + ">: " + client.bot.db.messages[k].msg.replace(split[1], split[2]);
                                     client.bot.functions.send('PRIVMSG ' + msg.channel + ' :' + result);
                                     break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+function swap(client, msg) {
+    var split,
+        i,
+        k,
+        keys,
+        newString = [],
+        stringSplit,
+        result;
+    if (msg.msg.indexOf('swap/') === 0) {
+        split = msg.msg.split('/');
+    }
+    if (split !== undefined && split.length) {
+        if (client.bot.functions.checkMsg(msg) && client.bot.functions.checkDB(client)) {
+            if (!client.bot.db.ignored.hasOwnProperty(msg.user)) {
+                keys = Object.keys(client.bot.db.messages).reverse();
+                for (i = 0; i < keys.length; i += 1) {
+                    k = keys[i];
+                    if (client.bot.db.messages.hasOwnProperty(k)) {
+                        if (client.bot.db.messages[k].user === client.bot.name) {
+                            delete client.bot.messages[k];
+                        } else {
+                            if (client.bot.db.messages[k].msg.indexOf('swap/') === -1 &&
+                                    client.bot.db.messages[k].msg.indexOf('s/') === -1) {
+                                if (client.bot.db.messages[k].msg.indexOf(split[1]) !== -1 &&
+                                        client.bot.db.messages[k].msg.indexOf(split[2]) !== -1) {
+                                    stringSplit = client.bot.db.messages[k].msg.split(split[1]);
+                                    newString[0] = stringSplit[0];
+                                    stringSplit = stringSplit[1].split(split[2]);
+                                    newString[1] = split[2];
+                                    newString[2] = stringSplit[0];
+                                    newString[3] = split[1];
+                                    newString[4] = stringSplit[1];
+                                    result = "<" + client.bot.db.messages[k].user + ">: " + newString.join('');
+                                    client.bot.functions.send('PRIVMSG ' + msg.channel + ' :' + result);
                                 }
                             }
                         }
@@ -478,3 +523,4 @@ module.exports.ud = ud;
 module.exports.clearpoints = clearpoints;
 module.exports.seds = seds;
 module.exports['s/'] = sed;
+module.exports['swap/'] = swap;
