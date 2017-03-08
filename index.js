@@ -4,7 +4,7 @@
  * get requirements and setup client
  */
 var json = require('jsonfile');
-var scrape = require("scrape-url");
+var curl = require('curlrequest');
 var net = require('net');
 var client = net.Socket();
 
@@ -237,16 +237,19 @@ readDB(function () {
                         cache.match = cache.currentMsg.msg.match(cache.getURL);
                         if (cache.match !== null) {
                             cache.match = cache.match[0].trim();
+                            var url = cache.match;
                             if (cache.match !== null && cache.match !== undefined && cache.match !== 0) {
-                                scrape(cache.match, 'head title', function (error, titles) {
-                                    if (!error) {
-                                        if (titles[0] !== undefined && titles[0] !== null && titles[0].length) {
-                                            cache.string = titles[0].text();
-                                            cache.string = String(cache.string).replace(/\r?\n|\r/g, '');
-                                            cache.string = String(cache.string).trim();
-                                            send('PRIVMSG ' + cache.currentMsg.channel + ' :' + cache.string);
-                                        }
+                                curl.request({
+                                    'url': cache.match,
+                                    'encoding': 'ascii',
+                                    'timeout': 10
+                                }, function (err, data) {
+                                    if (data.indexOf('<title>') === -1) {
+                                        send('PRIVMSG ' + cache.currentMsg.channel + ' :no title found for ' + url);
+                                        return false;
                                     }
+                                    var title = data.substr(data.indexOf('<title>') + 7, data.indexOf('</title>') - data.indexOf('<title>') - 7);
+                                    send('PRIVMSG ' + cache.currentMsg.channel + ' :' + title);
                                 });
                             }
                         }
